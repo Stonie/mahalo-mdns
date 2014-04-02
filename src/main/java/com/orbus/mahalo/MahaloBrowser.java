@@ -24,7 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orbus.mahalo.dns.DNSCache;
 import com.orbus.mahalo.dns.DNSEntry;
@@ -33,7 +34,8 @@ import com.orbus.mahalo.dns.DNSQuestion;
 import com.orbus.mahalo.dns.DNSRecord;
 
 public class MahaloBrowser implements MahaloSocketListener {
-	private static final Logger s_Logger = Logger.getLogger(MahaloBrowser.class);
+
+    private Logger _log = LoggerFactory.getLogger(MahaloBrowser.class);
 	
 	private boolean _bOwnsSocket;
 	private MahaloSocket _Socket;
@@ -154,10 +156,10 @@ public class MahaloBrowser implements MahaloSocketListener {
 					ServiceEvent evt = getEventFromRecord((DNSRecord.Service)srvRecord);
 					if(evt != null)
 						onServiceRemoved(evt);
-					else if(s_Logger.isTraceEnabled())
-						s_Logger.trace("Could not create service event from dying pointer record: " + ptrRecord);
-				} else if(s_Logger.isTraceEnabled()) {
-					s_Logger.trace("Could not find sevice associated with dying pointer record: " + ptrRecord);
+					else if(_log.isTraceEnabled())
+                        _log.trace("Could not create service event from dying pointer record: " + ptrRecord);
+				} else if(_log.isTraceEnabled()) {
+                    _log.trace("Could not find sevice associated with dying pointer record: " + ptrRecord);
 				}
 			}
 			else if(oldRecord == null && !bisExpired && 
@@ -234,7 +236,7 @@ public class MahaloBrowser implements MahaloSocketListener {
     	synchronized(_ServiceListeners) {
 	    	for(String key : _ServiceListeners.keySet()) {
 				if(srvInfo.getQualifiedName().endsWith(key)) {
-					s_Logger.debug("Reporting new service (" + srvInfo.getQualifiedName() + "@" + hostInfo.getAddress() + ") to " + key + " listners.");
+                    _log.debug("Reporting new service (" + srvInfo.getQualifiedName() + "@" + hostInfo.getAddress() + ") to " + key + " listners.");
 					List<ServiceListener> listeners = _ServiceListeners.get(key);
 					for(ServiceListener listener : listeners) {
 	    				listener.serviceAdded(aEvent);
@@ -250,7 +252,7 @@ public class MahaloBrowser implements MahaloSocketListener {
     	synchronized(_ServiceListeners) {
     		for(String key : _ServiceListeners.keySet()) {
 				if(srvInfo.getQualifiedName().endsWith(key)) {
-					s_Logger.debug("Reporting service removal (" + srvInfo.getQualifiedName() + ") to " + key +  " listners.");
+                    _log.debug("Reporting service removal (" + srvInfo.getQualifiedName() + ") to " + key +  " listners.");
 					List<ServiceListener> listeners = _ServiceListeners.get(key);
 					for(ServiceListener listener : listeners) {
 	    				listener.serviceRemoved(aEvent);

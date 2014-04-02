@@ -22,11 +22,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DNSCache
 {
-	private static final Logger s_Logger = Logger.getLogger(DNSCache.class);
+    private Logger _log = LoggerFactory.getLogger(DNSCache.class);
+
 	private Map<String, List<DNSRecord>> _Cache; 
 
     /**
@@ -69,7 +71,7 @@ public class DNSCache
     
     public synchronized void reap()
     {
-    	s_Logger.trace("Running the reaper.");
+        _log.trace("Running the reaper.");
     	// DON'T FEAR THE REAPPER!!!!!
     	long now = System.currentTimeMillis();
     
@@ -83,7 +85,7 @@ public class DNSCache
     			}
     		}
     		for(DNSRecord rec : removalList) {
-    			s_Logger.debug("Removing expired record: " + rec);
+                _log.debug("Removing expired record: " + rec);
     			list.remove(rec);
     		}
     		if(list.size() == 0)
@@ -91,7 +93,7 @@ public class DNSCache
     	}
     	
     	for(String key : mapRemovalList) {
-    		s_Logger.debug("Removing expired key: " + key);
+            _log.debug("Removing expired key: " + key);
     		_Cache.remove(key);
     	}
     }
@@ -112,13 +114,13 @@ public class DNSCache
 			// Check for a duplicate record.
     		for(DNSRecord rec : list) {
     			if(rec.equals(aRecord)) {
-    				s_Logger.warn("Attempt to add non-autoritative duplicate DNSRecord:" + aRecord);
+                    _log.warn("Attempt to add non-autoritative duplicate DNSRecord:" + aRecord);
     				baddRecord = false;
     				break;
     			}
     		}
     		if(baddRecord) {
-    			s_Logger.debug("Adding record " + aRecord + " to DNS cache.");
+                _log.debug("Adding record " + aRecord + " to DNS cache.");
     			list.add(aRecord);
     		}
     			
@@ -138,7 +140,7 @@ public class DNSCache
             {
             	if(rec.equals(aRecord))
             	{
-            		s_Logger.debug("Removing record " + aRecord + " from DNS cache.");
+                    _log.debug("Removing record " + aRecord + " from DNS cache.");
             		list.remove(rec);
             		if(list.size() == 0)
             			_Cache.remove(aRecord.getName());

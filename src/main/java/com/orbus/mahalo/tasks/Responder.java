@@ -22,7 +22,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimerTask;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orbus.mahalo.HostInfo;
 import com.orbus.mahalo.MahaloSocket;
@@ -34,12 +35,12 @@ import com.orbus.mahalo.dns.DNSRecord;
 
 public class Responder extends TimerTask {
 
+    private Logger _log = LoggerFactory.getLogger(Responder.class);
+
 	private static final int INTERVAL_MIN = 20;
 	private static final int INTERVAL_MAX = 115;
 	private static final Random s_Random = new Random();
-	
-	private static final Logger s_Logger = Logger.getLogger(Responder.class);	
-	
+
 	MahaloSocket _Socket;
 	HostInfo _LocalInfo;
 	Map<String, ServiceInfo> _LocalServices;
@@ -70,7 +71,7 @@ public class Responder extends TimerTask {
         	if(bsendUnicast == null)
         		bsendUnicast = question.wantsUnicastResponce();
         	else if((bsendUnicast && !question.wantsUnicastResponce()) || (!bsendUnicast && question.wantsUnicastResponce()))
-        		s_Logger.warn("Query from " + _Address + " is inconsistent with unicast response requests.  Sending responce multicast.");
+                _log.warn("Query from " + _Address + " is inconsistent with unicast response requests.  Sending responce multicast.");
         	bsendUnicast &= question.wantsUnicastResponce();
         	
             String squery = question.getName().toLowerCase();
@@ -135,7 +136,7 @@ public class Responder extends TimerTask {
         		_Socket.send(outPacket);
         }
         else
-        	s_Logger.trace("Found no responces to questions posed to the responder.");
+            _log.trace("Found no responces to questions posed to the responder.");
 	}
 	
 	public static int GetDelay(boolean abDelay, int aiElapsed)

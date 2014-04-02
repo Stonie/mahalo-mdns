@@ -24,7 +24,8 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orbus.mahalo.dns.DNSCache;
 
@@ -45,7 +46,8 @@ import com.orbus.mahalo.dns.DNSCache;
  */
 public class Mahalo
 {
-	private static final Logger s_Logger = Logger.getLogger(Mahalo.class);
+    private Logger _log = LoggerFactory.getLogger(Mahalo.class);
+
 	private static final int REAP_INTERVAL = 10000;
 	
 	/**
@@ -95,7 +97,7 @@ public class Mahalo
     				InetAddress address = addresses.nextElement();
     				// TODO: IPv6 support
     				if(address instanceof Inet4Address && !address.isLoopbackAddress()) {
-    					s_Logger.debug("After searching, we are broadcasting on address " + address);
+    					_log.debug("After searching, we are broadcasting on address " + address);
     					aAddress = address;
     				}
     			}
@@ -113,20 +115,20 @@ public class Mahalo
     			// In this case, use localhosts's name instead
     			asName = InetAddress.getLocalHost().getHostName();    			
     		}
-    		s_Logger.debug("Name not provided.  Using host name from address: " + asName);
+            _log.debug("Name not provided.  Using host name from address: " + asName);
     	}
-    	
-    	s_Logger.debug("Creating Mahalo socket at address " + aAddress);
+
+        _log.debug("Creating Mahalo socket at address " + aAddress);
     	_MahaloSocket = new MahaloSocket(aAddress);
     	_MahaloSocket.startListening();
-    	    		
-    	s_Logger.debug("Creating broadcaster and browser with host name " + asName);
+
+        _log.debug("Creating broadcaster and browser with host name " + asName);
     	_Broadcaster = new MahaloBroadcaster(_MahaloSocket, asName);
     	_Browser = new MahaloBrowser(_MahaloSocket, _Cache);
     }
     
     public void start() {
-    	s_Logger.info("Starting Mahalo mDNS / DNS-SD");
+        _log.info("Starting Mahalo mDNS / DNS-SD");
     	_Broadcaster.start();
     }
 
@@ -180,7 +182,7 @@ public class Mahalo
      * Close down jmdns. Release all resources and unregister all services.
      */
     public void close() {
-    	s_Logger.info("Closing Mahalo mDNS / DNS-DS");
+        _log.info("Closing Mahalo mDNS / DNS-DS");
         _Broadcaster.stop();
         _MahaloSocket.close();
     }

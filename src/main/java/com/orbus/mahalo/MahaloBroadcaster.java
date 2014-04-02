@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orbus.mahalo.dns.DNSEntry;
 import com.orbus.mahalo.dns.DNSPacket;
@@ -37,7 +38,8 @@ import com.orbus.mahalo.tasks.Prober;
 import com.orbus.mahalo.tasks.Responder;
 
 public class MahaloBroadcaster implements MahaloSocketListener {
-	private final static Logger s_Logger = Logger.getLogger(MahaloBroadcaster.class);
+
+    private Logger _log = LoggerFactory.getLogger(MahaloBroadcaster.class);
 	
 	private boolean _bOwnsSocket;
 	private MahaloSocket _MahaloSocket;
@@ -159,7 +161,7 @@ public class MahaloBroadcaster implements MahaloSocketListener {
     	}
     	int itimeElapsed = (int)(System.currentTimeMillis() - aPacket.getRecieved());
     	int idelay = Responder.GetDelay(bonlyResponder, itimeElapsed);
-    	s_Logger.trace("Scheduling responce in " + idelay + "ms");
+    	_log.trace("Scheduling responce in " + idelay + "ms");
     	_Timer.schedule(responder, idelay);
 	}
 	

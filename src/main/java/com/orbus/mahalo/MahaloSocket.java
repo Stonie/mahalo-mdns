@@ -28,13 +28,16 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.orbus.mahalo.dns.DNSPacket;
 
 public class MahaloSocket {
-	private static final Logger s_Logger = Logger.getLogger(MahaloSocket.class);
-	private static final int MDNS_PORT = 5353;
+
+    private Logger _log = LoggerFactory.getLogger(MahaloSocket.class);
+
+    private static final int MDNS_PORT = 5353;
 	
 	private NetworkInterface _NetInterface;
 	private InetAddress _BoundAddress;
@@ -81,8 +84,8 @@ public class MahaloSocket {
     		aAddress = _MulticastGroup;
     	if(iPort == null)
     		iPort = MDNS_PORT;
-    		
-    	s_Logger.trace("Sending packet to " + aAddress + ":" + iPort + "\n" + aMessage);
+
+        _log.trace("Sending packet to " + aAddress + ":" + iPort + "\n" + aMessage);
     	
     	try
     	{
@@ -96,13 +99,12 @@ public class MahaloSocket {
 	    		_MulticastSocket.send(packet);
 	    	}
     	} catch(IOException e) {
-    		s_Logger.warn("Error attempting to send DNSPacket: " + e.getMessage());
-    		s_Logger.warn("Trying to recover...");
+            _log.warn("Error attempting to send DNSPacket: " + e.getMessage());
+            _log.warn("Trying to recover...");
     		try {
     			recover();
     		} catch(IOException ioException) {
-    			s_Logger.fatal("Error trying to recover!  Exception follows.");
-        		s_Logger.fatal(ioException);
+                _log.error("Error trying to recover!  Exception follows.",ioException);
     		}
     	}
     }
@@ -118,7 +120,7 @@ public class MahaloSocket {
     public synchronized void close() {
     	if (_bContinueRunning)
         {
-    		s_Logger.info("Shutting down Mahalo socket connection");
+            _log.info("Shutting down Mahalo socket connection");
 //    		 Stop the listening thread
         	_bContinueRunning = false;
         	try {
@@ -141,7 +143,7 @@ public class MahaloSocket {
 	        	_MulticastSocket.leaveGroup(_MulticastGroup);
 	        	_MulticastSocket.close();
         	} catch(IOException e) {
-        		s_Logger.warn("Error closing multicast socket", e);
+        		_log.warn("Error closing multicast socket", e);
         	}
         }
         
@@ -163,7 +165,7 @@ public class MahaloSocket {
             
             _bContinueRunning = true;
     	} catch(IOException e) {
-    		s_Logger.error("Error opening multicast socket.  Closing... (ignore any warnings about errors closing the socket)", e);
+            _log.error("Error opening multicast socket.  Closing... (ignore any warnings about errors closing the socket)", e);
     		closeMulticastSocket();
     		throw e;
     	}
@@ -195,7 +197,7 @@ public class MahaloSocket {
     }
     
     private void onQuery(DNSPacket aPacket, InetAddress aAddress, int aiPort) {
-    	s_Logger.trace("Informing listeners of received query: " + aPacket);
+        _log.trace("Informing listeners of received query: " + aPacket);
     	synchronized(_Listeners) {
 	    	for(MahaloSocketListener listener : _Listeners) {
 	    		listener.handleQuery(aPacket, aAddress, aiPort);
@@ -204,7 +206,7 @@ public class MahaloSocket {
     }
     
     private void onResponse(DNSPacket aPacket) {
-    	s_Logger.trace("Informing listeners of received response: " + aPacket);
+        _log.trace("Informing listeners of received response: " + aPacket);
     	synchronized(_Listeners) {
 	    	for(MahaloSocketListener listener : _Listeners) {
 	    		listener.handleResponse(aPacket);
@@ -239,13 +241,12 @@ public class MahaloSocket {
 	        	} catch(SocketTimeoutException e) { 
 	        		// Ignore, this is just to keep us looping checking for cancelations
 	        	} catch(IOException e) {
-	        		s_Logger.warn("Error attempting to recieve DNSPacket: " + e.getMessage());
-	        		s_Logger.warn("Trying to recover...");
+                    _log.warn("Error attempting to recieve DNSPacket: " + e.getMessage());
+                    _log.warn("Trying to recover...");
 	        		try {
 	        			recover();
 	        		} catch(IOException ioException) {
-	        			s_Logger.fatal("Error trying to recover!  Exception follows.");
-	            		s_Logger.fatal(ioException);
+                        _log.error("Error trying to recover!  Exception follows.",ioException);
 	            		break;
 	        		}
 	        	}
